@@ -161,18 +161,22 @@ function getCoilWidth(th, w) {
 }
 
 // ── Table 7.14 — Squareness (diagonal difference) ──
-// width/length in INCHES → convert to feet for formula
+// Per footnote 3: if width is NOT an exact multiple of 12",
+// use the NEXT LARGEST exact multiple for calculation.
+// Per footnote 4: round result up to nearest 1/16".
 function getSquareness(wIn, lIn) {
   if (!wIn || !lIn) return null;
-  const wFt = wIn / 12;
-  const lFt = lIn / 12;
+  // Apply footnote 3: round width up to next multiple of 12"
+  const wCalc = (wIn % 12 === 0) ? wIn : Math.ceil(wIn / 12) * 12;
+  const wFt   = wCalc / 12;
+  const lFt   = lIn  / 12;
   let factor;
   if (wFt <= 3) factor = lFt <= 12 ? 3/32 : 9/64;
   else          factor = lFt <= 12 ? 5/64 : 7/64;
-  // Round up to nearest 1/16"
-  const raw = factor * wFt;
+  // Round up to nearest 1/16" per footnote 4
+  const raw     = factor * wFt;
   const rounded = Math.ceil(raw * 16) / 16;
-  return { tol: rounded, factor, wFt, lFt };
+  return { tol: rounded, wCalc, wFt, lFt, wasRounded: wCalc !== wIn };
 }
 
 // ── Alloy data ──────────────────────────────────────────────
@@ -355,21 +359,30 @@ export default function ToleranceCalc() {
     if (isCoil) {
       flatness = { label:'Coil set / edge wave — see H35.2 Table 7.12', note:'Sheet flatness (Table 7.17) does not apply to coil. Coil lateral bow per Table 7.12 by width and thickness.' };
     } else if (!isPlate) {
-      const grp = getFlatnessGroup(alloy);
-      const cls = th <= 0.064 ? 'thin' : 'thick';
-      const vals = grp === 1 ? SHEET_FLAT_G1[cls] : SHEET_FLAT_G2[cls];
-      flatness = {
-        label:`Group ${grp} Sheet — H35.2 Table 7.17`,
-        note:'Allowable bow by distance between buckles (ft). Not applicable to sheet over 60" wide, or O/F/HX8 tempers.',
-        rows: [
-          { band:'≤ 2 ft', tol:vals[0] },
-          { band:'2–3 ft', tol:vals[1] },
-          { band:'3–4 ft', tol:vals[2] },
-          { band:'4–6 ft', tol:vals[3] },
-          { band:'> 6 ft', tol:vals[4] },
-        ],
-        isTable: true,
-      };
+      // Table 7.17 only covers 0.020"–0.249". Below 0.020" is not in the table.
+      if (th < 0.020) {
+        flatness = {
+          label:'H35.2 Table 7.17',
+          note:`Thickness ${th}" is below the 0.020" minimum for H35.2 Table 7.17. No standard flatness tolerance applies at this gauge.`,
+          isTable: false, simple: 'N/A — below table minimum (0.020")',
+        };
+      } else {
+        const grp = getFlatnessGroup(alloy);
+        const cls = th <= 0.064 ? 'thin' : 'thick';
+        const vals = grp === 1 ? SHEET_FLAT_G1[cls] : SHEET_FLAT_G2[cls];
+        flatness = {
+          label:`Group ${grp} Sheet — H35.2 Table 7.17`,
+          note:'Allowable bow by distance between buckles (ft). Not applicable to sheet over 60" wide, or O/F/HX8 tempers.',
+          rows: [
+            { band:'≤ 2 ft', tol:vals[0] },
+            { band:'2–3 ft', tol:vals[1] },
+            { band:'3–4 ft', tol:vals[2] },
+            { band:'4–6 ft', tol:vals[3] },
+            { band:'> 6 ft', tol:vals[4] },
+          ],
+          isTable: true,
+        };
+      }
     } else {
       // Table 7.18 plate flatness — simplified longitudinal values
       const isTX51 = ['T351','T451','T651','T851','T7351','T7451','T7651'].includes(temper);
@@ -690,9 +703,12 @@ export default function ToleranceCalc() {
                   <p className="text-2xl font-extrabold text-neutral-900 leading-none mb-1">Δ max {fmtFrac(results.sq.tol)}</p>
                   <p className="text-xs text-neutral-500 mb-2">({fmt(results.sq.tol,4)}")</p>
                   <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-xs text-neutral-600 space-y-0.5">
-                    <p>Width = {results.sq.wFt.toFixed(2)} ft | Length = {results.sq.lFt.toFixed(2)} ft</p>
-                    <p>Difference between diagonal lengths must not exceed this value</p>
-                    <p className="text-neutral-400">Rounded up to nearest 1/16" per Table 7.14 footnote</p>
+                    <p>Calc. width: {results.sq.wCalc}" ({results.sq.wFt.toFixed(0)} ft) | Length: {results.sq.lFt.toFixed(2)} ft</p>
+                    {results.sq.wasRounded && (
+                      <p className="text-amber-700 font-semibold">Width rounded to {results.sq.wCalc}" per Table 7.14 footnote 3</p>
+                    )}
+                    <p>Difference between diagonals must not exceed this value</p>
+                    <p className="text-neutral-400">Result rounded up to nearest 1/16" per footnote 4</p>
                   </div>
                 </TolCard>
               ) : (
