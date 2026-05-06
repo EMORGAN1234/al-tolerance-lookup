@@ -838,6 +838,7 @@ export default function ToleranceCalc() {
                           <th className="px-3 py-2 text-right">24–60"</th>
                           <th className="px-3 py-2 text-right">60–96"</th>
                           <th className="px-3 py-2 text-right">96–132"</th>
+                          <th className="px-3 py-2 text-right">132–168"</th>
                         </tr></thead>
                         <tbody>
                           <tr className="rrow border-b border-neutral-100">
@@ -847,6 +848,7 @@ export default function ToleranceCalc() {
                             <td className="px-3 py-1.5 text-right font-mono">±1/8</td>
                             <td className="px-3 py-1.5 text-right font-mono">±1/8</td>
                             <td className="px-3 py-1.5 text-right font-mono">±5/32</td>
+                            <td className="px-3 py-1.5 text-right font-mono text-neutral-300">—</td>
                           </tr>
                           <tr className="rrow border-b border-neutral-100">
                             <td className="px-3 py-1.5">0.125–0.249" <span className="text-green-700 font-bold">(±)</span></td>
@@ -855,6 +857,7 @@ export default function ToleranceCalc() {
                             <td className="px-3 py-1.5 text-right font-mono">±1/8</td>
                             <td className="px-3 py-1.5 text-right font-mono">±5/32</td>
                             <td className="px-3 py-1.5 text-right font-mono">±3/16</td>
+                            <td className="px-3 py-1.5 text-right font-mono text-neutral-300">—</td>
                           </tr>
                           <tr className="rrow">
                             <td className="px-3 py-1.5">0.250–0.499" <span className="text-blue-700 font-bold">(+only)</span></td>
@@ -863,6 +866,7 @@ export default function ToleranceCalc() {
                             <td className="px-3 py-1.5 text-right font-mono">+3/8</td>
                             <td className="px-3 py-1.5 text-right font-mono">+3/8</td>
                             <td className="px-3 py-1.5 text-right font-mono">+7/16</td>
+                            <td className="px-3 py-1.5 text-right font-mono">+1/2</td>
                           </tr>
                         </tbody>
                       </table>
@@ -909,7 +913,8 @@ export default function ToleranceCalc() {
                       <p>Length &gt; 12 ft: 7/64 × width (ft)</p>
                     </div>
                   </div>
-                  <p className="text-neutral-400 mt-1 italic">Round result upward to nearest 1/16" per footnote 4</p>
+                  <p className="text-neutral-400 mt-1 italic">Footnote 3: If width is not an exact multiple of 12", use the next largest multiple. Example: 53" → use 60" (5 ft).</p>
+                  <p className="text-neutral-400 mt-0.5 italic">Footnote 4: Round result upward to nearest 1/16".</p>
                 </div>
 
                 {/* Disclaimer */}
