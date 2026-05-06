@@ -289,6 +289,7 @@ export default function ToleranceCalc() {
 
     const isCoil  = form === 'coil';
     const isPlate = form === 'plate';
+    const isSheet = form === 'sheet';
     const warnings = [];
 
     if (alloyInfo.sheetOnly && isPlate) {
@@ -402,12 +403,12 @@ export default function ToleranceCalc() {
   const labelCls = "block text-xs font-semibold mb-1.5 text-neutral-600";
   const hasResults = results && !results.invalid;
 
-  const TolCard = ({ title, color, border, ref:refLabel, dimmed, children }) => (
+  const TolCard = ({ title, color, border, tableRef, dimmed, children }) => (
     <div style={{ borderTopColor:border }}
       className={`bg-white rounded-2xl shadow p-5 border-t-2 hover:shadow-md transition-shadow ${dimmed?'opacity-40 pointer-events-none':''}`}>
       <div className="flex items-center justify-between mb-3">
         <p style={{ color }} className="text-xs font-bold uppercase tracking-wider">{title}</p>
-        {refLabel && <span className="text-xs text-neutral-400 font-mono">{refLabel}</span>}
+        {tableRef && <span className="text-xs text-neutral-400 font-mono">{tableRef}</span>}
       </div>
       {children}
     </div>
@@ -602,7 +603,7 @@ export default function ToleranceCalc() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
               {/* Thickness */}
-              <TolCard title="Thickness (Gauge)" color="#b91c1c" border="#dc2626" ref={results.tableRef}>
+              <TolCard title="Thickness (Gauge)" color="#b91c1c" border="#dc2626" tableRef={results.tableRef}>
                 {results.noWidthEntered ? (
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
                     <p className="font-bold mb-1">Width required</p>
@@ -630,7 +631,7 @@ export default function ToleranceCalc() {
 
               {/* Width */}
               {results.widthTol ? (
-                <TolCard title="Width" color="#1d4ed8" border="#3b82f6" ref={results.widthTol.ref}>
+                <TolCard title="Width" color="#1d4ed8" border="#3b82f6" tableRef={results.widthTol.ref}>
                   <TolDisplay tol={results.widthTol.tol} sym={results.widthTol.sym} nominal={results.w}/>
                   <p className="text-xs text-neutral-500 mt-2">{results.widthTol.note}</p>
                 </TolCard>
@@ -647,7 +648,7 @@ export default function ToleranceCalc() {
                   <p className="text-xs text-neutral-400 mt-1">Coil is continuous — length tolerance does not apply.</p>
                 </TolCard>
               ) : results.lengthTol ? (
-                <TolCard title="Length" color="#7e22ce" border="#a855f7" ref={results.lengthTol.ref}>
+                <TolCard title="Length" color="#7e22ce" border="#a855f7" tableRef={results.lengthTol.ref}>
                   <TolDisplay tol={results.lengthTol.tol} sym={results.lengthTol.sym} nominal={results.l}/>
                   <p className="text-xs text-neutral-500 mt-2">{results.lengthTol.note}</p>
                 </TolCard>
@@ -662,7 +663,7 @@ export default function ToleranceCalc() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
               {/* Flatness */}
-              <TolCard title="Flatness / Bow" color="#92400e" border="#f59e0b" ref={results.flatness?.label}>
+              <TolCard title="Flatness / Bow" color="#92400e" border="#f59e0b" tableRef={results.flatness?.label}>
                 {results.flatness?.isTable ? (
                   <>
                     <p className="text-xs text-neutral-500 mb-2">{results.flatness.note}</p>
@@ -685,7 +686,7 @@ export default function ToleranceCalc() {
 
               {/* Squareness */}
               {results.sq ? (
-                <TolCard title="Squareness" color="#065f46" border="#10b981" ref="H35.2 Table 7.14">
+                <TolCard title="Squareness" color="#065f46" border="#10b981" tableRef="H35.2 Table 7.14">
                   <p className="text-2xl font-extrabold text-neutral-900 leading-none mb-1">Δ max {fmtFrac(results.sq.tol)}</p>
                   <p className="text-xs text-neutral-500 mb-2">({fmt(results.sq.tol,4)}")</p>
                   <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-xs text-neutral-600 space-y-0.5">
@@ -703,7 +704,7 @@ export default function ToleranceCalc() {
               )}
 
               {/* Lateral Bow / Camber */}
-              <TolCard title="Lateral Bow" color="#9a3412" border="#f97316" ref={results.isCoil ? 'H35.2 Table 7.12' : 'H35.2 Table 7.13'}>
+              <TolCard title="Lateral Bow" color="#9a3412" border="#f97316" tableRef={results.isCoil ? 'H35.2 Table 7.12' : 'H35.2 Table 7.13'}>
                 {results.isCoil ? (
                   <>
                     <p className="text-xs text-neutral-500 mb-2">Coil lateral bow per Table 7.12 — varies by width and thickness</p>
